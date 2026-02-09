@@ -1,6 +1,7 @@
 <script lang="ts">
     import { session } from "$lib/session";
     import { supabase } from "$lib/supabaseClient";
+    import AddOfferModal from "$lib/AddOfferModal.svelte";
 
     async function signInWithGithub() {
         const { data, error } = await supabase.auth.signInWithOAuth({
@@ -29,7 +30,7 @@
         </div>
         <footer class="border-top py-4">
             <div class="text-center">
-                <button class="btn btn-dark rounded-circle" style="width: 3rem; height: 3rem; font-size: 1.5rem;">+</button>
+                <AddOfferModal />
             </div>
         </footer>
     </main>
