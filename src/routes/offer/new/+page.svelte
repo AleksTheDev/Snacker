@@ -65,7 +65,7 @@
 
 <main class="container py-4">
     <h2>Нова обява</h2>
-    <div class="card p-3">
+    <div class="card p-3" style="border: none !important; background: transparent !important; box-shadow: none !important;">
         <div class="mb-3">
             <label class="form-label">Название</label>
             <input class="form-control" bind:value={title} placeholder="Въведете название" disabled={isLoading} />
@@ -107,6 +107,7 @@
 <style>
 .image-preview-container{display:flex;gap:1rem;flex-wrap:wrap}
 .image-preview-item{display:flex;flex-direction:column;align-items:center}
-.image-preview{width:120px;height:120px;object-fit:cover;border:1px solid #dee2e6;border-radius:4px}
+.image-preview{width:120px;height:120px;object-fit:cover;border:1px solid #dee2e6;border-radius:8px;transition:transform 0.2s ease, box-shadow 0.2s ease}
+.image-preview:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0, 0, 0, 0.15)}
 .image-preview-index{position:relative;top:-110px;left:40px;background:#007bff;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
 </style>
