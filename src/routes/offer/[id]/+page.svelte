@@ -52,7 +52,7 @@
                         <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                     </svg>
                 </button>
-                <div class="card shadow-sm">
+                <div class="card shadow-sm" style="border: none !important; background: transparent !important; box-shadow: none !important;">
                     <div class="row g-0">
                         <div class="col-md-5">
                             {#if offer.images && offer.images.length > 0}
@@ -60,7 +60,7 @@
                                     <div class="carousel-inner">
                                         {#each offer.images as img, i}
                                             <div class={`carousel-item${i === 0 ? ' active' : ''}`}>
-                                                <img src={img.url} class="d-block w-100" style="object-fit:cover; min-height:250px; height:100%;" alt={`${offer.title} ${i+1}`} />
+                                                <img src={img.url} class="d-block w-100" style="object-fit:cover; min-height:250px; height:100%; border-radius: 8px;" alt={`${offer.title} ${i+1}`} />
                                             </div>
                                         {/each}
                                     </div>
@@ -76,7 +76,7 @@
                                     {/if}
                                 </div>
                             {:else}
-                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:100%; min-height:250px;">Без изображение</div>
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:100%; min-height:250px; border-radius: 8px;">Без изображение</div>
                             {/if}
                         </div>
                         <div class="col-md-7">
