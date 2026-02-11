@@ -47,7 +47,7 @@
             <div class="text-danger">Оферта не е намерена.</div>
         {:else}
             <div>
-                <button class="btn btn-light shadow-sm mb-3" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;" on:click={goBack} aria-label="Назад">
+                <button class="btn shadow-sm mb-3" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:#213448; color:#000; border:none;" on:click={goBack} aria-label="Назад">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden>
                         <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                     </svg>
