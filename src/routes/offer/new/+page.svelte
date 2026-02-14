@@ -1,11 +1,13 @@
 <script lang="ts">
     import { supabase } from '$lib/supabaseClient';
     import { session } from '$lib/session';
-    import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
 
     let title = '';
     let description = '';
+    let phone = '';
+    const PHONE_LENGTH = 10; // change this value if you need a different exact length
+    let location = '';
     let selectedFiles: File[] = [];
     let isLoading = false;
     let fileInputElement: HTMLInputElement;
@@ -47,11 +49,22 @@
 
     async function handleSubmit() {
         if (!title.trim() || !description.trim()) { alert('Моля попълнете всички полета'); return; }
+        const phoneTrim = phone.trim();
+        if (phoneTrim) {
+            if (!/^\d+$/.test(phoneTrim) || phoneTrim.length !== PHONE_LENGTH) {
+                alert(`Моля въведете телефонен номер, съдържащ точно ${PHONE_LENGTH} цифри`);
+                return;
+            }
+        }
         const user = $session?.user;
         if (!user) { alert('Трябва да сте логнати'); return; }
         isLoading = true;
         try {
-            const { data: offerData, error: offerError } = await supabase.from('offer').insert({ title: title.trim(), description: description.trim(), user_id: user.id }).select().single();
+            const insertPayload: any = { title: title.trim(), description: description.trim(), user_id: user.id };
+            if (phoneTrim) insertPayload.phone = phoneTrim;
+            if (location && location.trim()) insertPayload.location = location.trim();
+
+            const { data: offerData, error: offerError } = await supabase.from('offer').insert(insertPayload).select().single();
             if (offerError) throw offerError;
             if (selectedFiles.length > 0) await uploadImages(offerData.id, user.id);
             // redirect to created offer
@@ -75,8 +88,25 @@
             <textarea class="form-control" rows={4} bind:value={description} disabled={isLoading}></textarea>
         </div>
         <div class="mb-3">
+            <label class="form-label">Телефон (само цифри, не е задължителен)</label>
+            <input
+                class="form-control"
+                bind:value={phone}
+                placeholder="0881234567"
+                maxlength={PHONE_LENGTH}
+                inputmode="numeric"
+                pattern="[0-9]*"
+                on:input={(e) => phone = (e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, PHONE_LENGTH)}
+                disabled={isLoading}
+            />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Локация (напр. град или квартал)</label>
+            <input class="form-control" bind:value={location} placeholder="София, Център" maxlength={100} disabled={isLoading} />
+        </div>
+        <div class="mb-3">
             <label class="form-label">Изображения</label>
-            <input type="file" class="form-control" multiple accept="image/*" bind:this={fileInputElement} onchange={handleFileSelect} disabled={isLoading} />
+            <input type="file" class="form-control" multiple accept="image/*" bind:this={fileInputElement} on:change={handleFileSelect} disabled={isLoading} />
             <small class="text-muted">Изберете няколко изображения (не е задължително)</small>
         </div>
 
@@ -87,7 +117,7 @@
                         <div class="image-preview-item">
                             <div class="image-preview-index">{idx + 1}</div>
                             <img src={URL.createObjectURL(file)} class="image-preview" />
-                            <button class="btn btn-sm btn-danger" onclick={() => removeFile(idx)} disabled={isLoading}>Премахни</button>
+                            <button class="btn btn-sm btn-danger" on:click={() => removeFile(idx)} disabled={isLoading}>Премахни</button>
                             <small class="text-muted">{file.name}</small>
                         </div>
                     {/each}
@@ -96,8 +126,8 @@
         {/if}
 
         <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-secondary" onclick={() => goto('/')} disabled={isLoading}>Отказ</button>
-            <button class="btn btn-primary" onclick={handleSubmit} disabled={isLoading}>
+            <button class="btn btn-secondary" on:click={() => goto('/')} disabled={isLoading}>Отказ</button>
+            <button class="btn btn-primary" on:click={handleSubmit} disabled={isLoading}>
                 {#if isLoading}<span class="spinner-border spinner-border-sm me-2" role="status"></span>Създавам...{:else}Създай оферта{/if}
             </button>
         </div>
@@ -106,8 +136,8 @@
 
 <style>
 .image-preview-container{display:flex;gap:1rem;flex-wrap:wrap}
-.image-preview-item{display:flex;flex-direction:column;align-items:center}
+.image-preview-item{display:flex;flex-direction:column;align-items:center;position:relative}
 .image-preview{width:120px;height:120px;object-fit:cover;border:1px solid #dee2e6;border-radius:8px;transition:transform 0.2s ease, box-shadow 0.2s ease}
 .image-preview:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0, 0, 0, 0.15)}
-.image-preview-index{position:relative;top:-110px;left:40px;background:#007bff;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.image-preview-index{position:absolute;top:4px;right:4px;background:#007bff;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
 </style>

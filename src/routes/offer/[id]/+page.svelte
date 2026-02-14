@@ -86,6 +86,9 @@
                                 {#if offer.price}
                                     <p><strong>Цена:</strong> {offer.price}</p>
                                 {/if}
+                                {#if offer.phone}
+                                    <p><strong>Телефон:</strong> <a href="tel:{offer.phone}">{offer.phone}</a></p>
+                                {/if}
                                 {#if offer.location}
                                     <p><strong>Местоположение:</strong> {offer.location}</p>
                                 {/if}
