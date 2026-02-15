@@ -60,7 +60,7 @@
                                     <div class="carousel-inner">
                                         {#each offer.images as img, i}
                                             <div class={`carousel-item${i === 0 ? ' active' : ''}`}>
-                                                <img src={img.url} class="d-block w-100" style="object-fit:cover; min-height:250px; height:100%; border-radius: 8px;" alt={`${offer.title} ${i+1}`} />
+                                                <img src={img.url} class="d-block w-100" style="object-fit:cover; min-height:250px; height:100%; border-top-left-radius: 8px; border-top-right-radius: 8px;" alt={`${offer.title} ${i+1}`} />
                                             </div>
                                         {/each}
                                     </div>
@@ -80,14 +80,14 @@
                             {/if}
                         </div>
                         <div class="col-md-7">
-                            <div class="card-body">
+                            <div class="card-body" style="border-bottom-left-radius: 8px !important; border-bottom-right-radius: 8px !important;">
                                 <h1 class="card-title">{offer.title}</h1>
                                 <p class="text-muted">{offer.description}</p>
                                 {#if offer.price}
                                     <p><strong>Цена:</strong> {offer.price}</p>
                                 {/if}
                                 {#if offer.phone}
-                                    <p><strong>Телефон:</strong> <a href="tel:{offer.phone}">{offer.phone}</a></p>
+                                    <p><strong>Телефон:</strong> <a style="color: white !important;" href="tel:{offer.phone}">{offer.phone}</a></p>
                                 {/if}
                                 {#if offer.location}
                                     <p><strong>Местоположение:</strong> {offer.location}</p>
