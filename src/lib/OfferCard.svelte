@@ -11,6 +11,12 @@
     {/if}
     <div class="card-body">
         <h5 class="card-title">{offer.title}</h5>
+        {#if offer.location}
+            <small class="text-muted d-block mb-2">📍 {offer.location}</small>
+        {/if}
+        {#if offer.phone}
+            <small class="text-muted d-block">📞 {offer.phone}</small>
+        {/if}
     </div>
 </a>
 
