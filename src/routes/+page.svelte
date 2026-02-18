@@ -7,6 +7,15 @@
 
     let offers: any[] = [];
     let loading = true;
+    let searchQuery = '';
+
+    $: filteredOffers = searchQuery.trim() === ''
+        ? offers
+        : offers.filter((o: any) => {
+            const hay = ((o.title ?? '') + ' ' + (o.description ?? '') + ' ' + (o.location ?? '') + ' ' + (o.phone_location ?? '') + ' ' + (o.address ?? '')).toLowerCase();
+            const q = searchQuery.toLowerCase().trim();
+            return q.split(/\s+/).every((tok) => hay.includes(tok));
+        });
 
     async function fetchOffers() {
         loading = true;
@@ -62,6 +71,11 @@
         <div class="container py-4">
             <h2 class="mb-4">Налични оферти</h2>
 
+            <div class="mb-3 d-flex">
+                <input class="form-control me-2" type="search" placeholder="Търсене по заглавие, описание или локация" bind:value={searchQuery} />
+                <button class="btn btn-secondary" onclick={() => searchQuery = ''}>Изчисти</button>
+            </div>
+
             {#if loading}
                 <div class="d-flex justify-content-center py-5">
                     <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
@@ -70,13 +84,17 @@
                 {#if offers.length === 0}
                     <div class="text-muted">Няма налични оферти в момента.</div>
                 {:else}
-                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                        {#each offers as offer}
-                            <div class="col">
-                                <OfferCard {offer} />
-                            </div>
-                        {/each}
-                    </div>
+                    {#if filteredOffers.length === 0}
+                        <div class="text-muted">Няма оферти, съвпадащи с търсенето.</div>
+                    {:else}
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                            {#each filteredOffers as offer, i (offer.id ?? i)}
+                                <div class="col">
+                                    <OfferCard {offer} />
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
                 {/if}
             {/if}
         </div>
