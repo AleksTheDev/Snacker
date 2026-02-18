@@ -107,7 +107,7 @@
         <div class="mb-3">
             <label class="form-label">Изображения</label>
             <input type="file" class="form-control" multiple accept="image/*" bind:this={fileInputElement} on:change={handleFileSelect} disabled={isLoading} />
-            <small class="text-muted">Изберете няколко изображения (не е задължително)</small>
+            <small class="text-muted">Изберете няколко изображения (не e задължително)</small>
         </div>
 
         {#if selectedFiles.length > 0}

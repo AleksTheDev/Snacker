@@ -100,7 +100,7 @@
 .add-offer-fixed :global(button){border-radius:50%;padding:0.6rem 0.75rem;background:#d35100;color:#000;border:none}
 
 /* Page background gradient */
-:global(body){background: linear-gradient(180deg,#EAE0CF 0%,#EAE0CF 100%);}
+/* :global(body){background: linear-gradient(180deg,#EAE0CF 0%,#EAE0CF 100%);} */
 
 /* Ensure add button icon (svg) is black */
 .add-offer-fixed :global(svg){color:#000;fill:currentColor}
