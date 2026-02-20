@@ -1,24 +1,27 @@
 <script lang="ts">
-    import { supabase } from '$lib/supabaseClient';
-    import { session } from '$lib/session';
-    import { goto } from '$app/navigation';
+    import { supabase } from "$lib/supabaseClient";
+    import { session } from "$lib/session";
+    import { goto } from "$app/navigation";
 
-    let title = '';
-    let description = '';
-    let phone = '';
+    let title = "";
+    let description = "";
+    let phone = "";
     const PHONE_LENGTH = 10; // change this value if you need a different exact length
-    let location = '';
+    let location = "";
     let selectedFiles: File[] = [];
     let isLoading = false;
     let fileInputElement: HTMLInputElement;
 
-    interface FileWithIndex { file: File; index: number }
+    interface FileWithIndex {
+        file: File;
+        index: number;
+    }
 
     function handleFileSelect(event: Event) {
         const input = event.target as HTMLInputElement;
         if (input.files) {
             selectedFiles = [...selectedFiles, ...Array.from(input.files)];
-            input.value = '';
+            input.value = "";
         }
     }
 
@@ -29,26 +32,37 @@
     async function uploadImages(offerId: any, userId: string) {
         const filesWithIndex: FileWithIndex[] = selectedFiles.map((file, idx) => ({ file, index: idx + 1 }));
         for (const { file, index } of filesWithIndex) {
-            const mime = file.type || 'image/jpeg';
-            const ext = mime.split('/').pop() || 'jpg';
+            const mime = file.type || "image/jpeg";
+            const ext = mime.split("/").pop() || "jpg";
             const filename = `${crypto.randomUUID()}.${ext}`;
             const storagePath = `${userId}/offer${offerId}/${filename}`;
-            const { error: uploadError } = await supabase.storage.from('images').upload(storagePath, file, { cacheControl: '3600', upsert: false, contentType: mime } as any);
+            const { error: uploadError } = await supabase.storage
+                .from("images")
+                .upload(storagePath, file, { cacheControl: "3600", upsert: false, contentType: mime } as any);
             if (uploadError) throw uploadError;
 
             let publicUrl: string | null = null;
-            try { const { data } = supabase.storage.from('images').getPublicUrl(storagePath); publicUrl = (data as any)?.publicUrl || null; } catch (e) { }
+            try {
+                const { data } = supabase.storage.from("images").getPublicUrl(storagePath);
+                publicUrl = (data as any)?.publicUrl || null;
+            } catch (e) {}
             if (!publicUrl) {
-                try { const { data: sd, error: se } = await supabase.storage.from('images').createSignedUrl(storagePath, 60 * 60 * 24); if (!se && sd?.signedUrl) publicUrl = sd.signedUrl; } catch (e) { }
+                try {
+                    const { data: sd, error: se } = await supabase.storage.from("images").createSignedUrl(storagePath, 60 * 60 * 24);
+                    if (!se && sd?.signedUrl) publicUrl = sd.signedUrl;
+                } catch (e) {}
             }
-            if (!publicUrl) throw new Error('Could not obtain URL for uploaded image');
-            const { error: insertError } = await supabase.from('image').insert({ offer_id: offerId, index, url: publicUrl, user_id: userId });
+            if (!publicUrl) throw new Error("Could not obtain URL for uploaded image");
+            const { error: insertError } = await supabase.from("image").insert({ offer_id: offerId, index, url: publicUrl, user_id: userId });
             if (insertError) throw insertError;
         }
     }
 
     async function handleSubmit() {
-        if (!title.trim() || !description.trim()) { alert('Моля попълнете всички полета'); return; }
+        if (!title.trim() || !description.trim()) {
+            alert("Моля попълнете всички полета");
+            return;
+        }
         const phoneTrim = phone.trim();
         if (phoneTrim) {
             if (!/^\d+$/.test(phoneTrim) || phoneTrim.length !== PHONE_LENGTH) {
@@ -57,28 +71,33 @@
             }
         }
         const user = $session?.user;
-        if (!user) { alert('Трябва да сте логнати'); return; }
+        if (!user) {
+            alert("Трябва да сте логнати");
+            return;
+        }
         isLoading = true;
         try {
             const insertPayload: any = { title: title.trim(), description: description.trim(), user_id: user.id };
             if (phoneTrim) insertPayload.phone = phoneTrim;
             if (location && location.trim()) insertPayload.location = location.trim();
 
-            const { data: offerData, error: offerError } = await supabase.from('offer').insert(insertPayload).select().single();
+            const { data: offerData, error: offerError } = await supabase.from("offer").insert(insertPayload).select().single();
             if (offerError) throw offerError;
             if (selectedFiles.length > 0) await uploadImages(offerData.id, user.id);
             // redirect to created offer
             goto(`/offer/${offerData.id}`);
         } catch (e) {
-            console.error('Error creating offer:', e);
-            alert('Грешка при създаване на оферта. Моля опитайте отново.');
-        } finally { isLoading = false; }
+            console.error("Error creating offer:", e);
+            alert("Грешка при създаване на оферта. Моля опитайте отново.");
+        } finally {
+            isLoading = false;
+        }
     }
 </script>
 
 <main class="container py-4">
     <h2>Нова обява</h2>
-    <div class="card p-3" style="border: none !important; background: transparent !important; box-shadow: none !important;">
+    <div class="card p-3 bg-transparent border-0 shadow-none">
         <div class="mb-3">
             <label class="form-label">Название</label>
             <input class="form-control" bind:value={title} placeholder="Въведете название" disabled={isLoading} />
@@ -96,7 +115,7 @@
                 maxlength={PHONE_LENGTH}
                 inputmode="numeric"
                 pattern="[0-9]*"
-                on:input={(e) => phone = (e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, PHONE_LENGTH)}
+                on:input={(e) => (phone = (e.target as HTMLInputElement).value.replace(/\D/g, "").slice(0, PHONE_LENGTH))}
                 disabled={isLoading}
             />
         </div>
@@ -126,18 +145,10 @@
         {/if}
 
         <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-secondary" on:click={() => goto('/')} disabled={isLoading}>Отказ</button>
+            <button class="btn btn-secondary" on:click={() => goto("/")} disabled={isLoading}>Отказ</button>
             <button class="btn btn-primary" on:click={handleSubmit} disabled={isLoading}>
                 {#if isLoading}<span class="spinner-border spinner-border-sm me-2" role="status"></span>Създавам...{:else}Създай оферта{/if}
             </button>
         </div>
     </div>
 </main>
-
-<style>
-.image-preview-container{display:flex;gap:1rem;flex-wrap:wrap}
-.image-preview-item{display:flex;flex-direction:column;align-items:center;position:relative}
-.image-preview{width:120px;height:120px;object-fit:cover;border:1px solid #dee2e6;border-radius:8px;transition:transform 0.2s ease, box-shadow 0.2s ease}
-.image-preview:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0, 0, 0, 0.15)}
-.image-preview-index{position:absolute;top:4px;right:4px;background:#007bff;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
-</style>

@@ -7,22 +7,30 @@
 
     let offers: any[] = [];
     let loading = true;
-    let searchQuery = '';
+    let searchQuery = "";
 
-    $: filteredOffers = searchQuery.trim() === ''
-        ? offers
-        : offers.filter((o: any) => {
-            const hay = ((o.title ?? '') + ' ' + (o.description ?? '') + ' ' + (o.location ?? '') + ' ' + (o.phone_location ?? '') + ' ' + (o.address ?? '')).toLowerCase();
-            const q = searchQuery.toLowerCase().trim();
-            return q.split(/\s+/).every((tok) => hay.includes(tok));
-        });
+    $: filteredOffers =
+        searchQuery.trim() === ""
+            ? offers
+            : offers.filter((o: any) => {
+                  const hay = (
+                      (o.title ?? "") +
+                      " " +
+                      (o.description ?? "") +
+                      " " +
+                      (o.location ?? "") +
+                      " " +
+                      (o.phone_location ?? "") +
+                      " " +
+                      (o.address ?? "")
+                  ).toLowerCase();
+                  const q = searchQuery.toLowerCase().trim();
+                  return q.split(/\s+/).every((tok) => hay.includes(tok));
+              });
 
     async function fetchOffers() {
         loading = true;
-        const { data, error } = await supabase
-            .from("offer")
-            .select("*, image(*)")
-            .order("created_at", { ascending: false });
+        const { data, error } = await supabase.from("offer").select("*, image(*)").order("created_at", { ascending: false });
 
         if (error) {
             console.error("Error loading offers:", error);
@@ -40,15 +48,15 @@
     onMount(() => {
         fetchOffers();
         const handler = () => fetchOffers();
-        window.addEventListener('offer:created', handler);
-        return () => window.removeEventListener('offer:created', handler);
+        window.addEventListener("offer:created", handler);
+        return () => window.removeEventListener("offer:created", handler);
     });
 
     // navigation to individual offer pages is handled by links / routes
 
-    async function signInWithGithub() {
+    async function signInWithGoogle() {
         const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "github",
+            provider: "google",
             options: {
                 redirectTo: `${window.location.origin}`,
             },
@@ -63,7 +71,7 @@
     <main class="d-flex align-items-center justify-content-center min-vh-100">
         <div class="text-center">
             <h1 class="display-3 fw-bold mb-4">Снакър</h1>
-            <button class="btn btn-dark btn-lg" onclick={signInWithGithub}> Влез с Гитхъб </button>
+            <button class="btn btn-dark btn-lg" onclick={signInWithGoogle}> Влез с Google </button>
         </div>
     </main>
 {:else}
@@ -73,29 +81,25 @@
 
             <div class="mb-3 d-flex">
                 <input class="form-control me-2" type="search" placeholder="Търсене по заглавие, описание или локация" bind:value={searchQuery} />
-                <button class="btn btn-secondary" onclick={() => searchQuery = ''}>Изчисти</button>
+                <button class="btn btn-secondary" onclick={() => (searchQuery = "")}>Изчисти</button>
             </div>
 
             {#if loading}
                 <div class="d-flex justify-content-center py-5">
                     <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
                 </div>
+            {:else if offers.length === 0}
+                <div class="text-muted">Няма налични оферти в момента.</div>
+            {:else if filteredOffers.length === 0}
+                <div class="text-muted">Няма оферти, съвпадащи с търсенето.</div>
             {:else}
-                {#if offers.length === 0}
-                    <div class="text-muted">Няма налични оферти в момента.</div>
-                {:else}
-                    {#if filteredOffers.length === 0}
-                        <div class="text-muted">Няма оферти, съвпадащи с търсенето.</div>
-                    {:else}
-                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                            {#each filteredOffers as offer, i (offer.id ?? i)}
-                                <div class="col">
-                                    <OfferCard {offer} />
-                                </div>
-                            {/each}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                    {#each filteredOffers as offer, i (offer.id ?? i)}
+                        <div class="col">
+                            <OfferCard {offer} />
                         </div>
-                    {/if}
-                {/if}
+                    {/each}
+                </div>
             {/if}
         </div>
 
@@ -104,22 +108,9 @@
                 <!-- footer left intentionally empty; AddOffer button is fixed to viewport -->
             </div>
         </footer>
-
-        
     </main>
+
+    <div class="add-offer-fixed">
+        <AddOfferModal />
+    </div>
 {/if}
-
-<div class="add-offer-fixed">
-    <AddOfferModal />
-</div>
-
-<style>
-.add-offer-fixed{position:fixed;right:20px;bottom:20px;z-index:1100}
-.add-offer-fixed :global(button){border-radius:50%;padding:0.6rem 0.75rem;background:#d35100;color:#000;border:none}
-
-/* Page background gradient */
-/* :global(body){background: linear-gradient(180deg,#EAE0CF 0%,#EAE0CF 100%);} */
-
-/* Ensure add button icon (svg) is black */
-.add-offer-fixed :global(svg){color:#000;fill:currentColor}
-</style>

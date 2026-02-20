@@ -1,0 +1,230 @@
+/* Global stylesheet consolidated from per-file styles */
+/* Page background and base colors */
+body {
+    background: linear-gradient(to right, #eb4e4e, #ffed54);
+    min-height: 100vh;
+    color: #ffffff;
+}
+
+/* Ensure most text is white to match previous design */
+* {
+    color: #ffffff !important;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+label {
+    color: #ffffff !important;
+}
+
+/* Buttons and form controls theme */
+.btn-primary {
+    background-color: #6a1f1f !important;
+    border-color: #a12d2d !important;
+    color: #ffffff !important;
+}
+.btn-primary:hover {
+    background-color: #491414 !important;
+    border-color: #a12d2d !important;
+    color: #ffffff !important;
+}
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #a12d2d !important;
+    border-color: #a12d2d !important;
+    color: #ffffff !important;
+}
+
+.form-control,
+.form-control:focus {
+    background-color: #a12d2d !important;
+    color: #ffffff !important;
+    border-color: #a12d2d !important;
+    caret-color: #ffffff !important;
+}
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+textarea.form-control {
+    background-color: #a12d2d !important;
+    color: #ffffff !important;
+}
+.form-label {
+    color: #ffffff !important;
+}
+
+a {
+    text-decoration: none;
+}
+a:hover {
+    color: #a12d2d !important;
+}
+.text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+.text-danger {
+    color: #a12d2d !important;
+}
+
+/* Card defaults used across the app */
+.card {
+    background-color: #571313 !important;
+    color: #ffffff !important;
+    border: none !important;
+    display: block;
+}
+.card-body {
+    background-color: #a12d2d !important;
+    color: #ffffff !important;
+}
+.card-title {
+    color: #ffffff !important;
+}
+
+/* Offer card specific styles (keeps original design) */
+.offer-card {
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    border: 1px solid #547792;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0b0b0b;
+}
+.offer-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(211, 81, 0, 0.12);
+}
+.offer-card .card-title {
+    color: #547792;
+}
+.offer-image {
+    display: block;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Floating add button */
+.add-offer-fixed {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1100;
+}
+.add-offer-fixed button {
+    border-radius: 50%;
+    padding: 0.6rem 0.75rem;
+    background: #d35100;
+    color: #000;
+    border: none;
+}
+.add-offer-btn {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background: #213448;
+    color: #000;
+    border: none;
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.add-offer-btn svg {
+    color: #000;
+    fill: currentColor;
+}
+.add-offer-fixed svg {
+    color: #000;
+    fill: currentColor;
+}
+
+/* Image preview styles for new-offer page */
+.image-preview-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.image-preview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+.image-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+.image-preview:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.image-preview-index {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #007bff;
+    color: #fff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Small utility to remove shadows where inline styles used to do so */
+.shadow-none {
+    box-shadow: none !important;
+}
+
+/* Offer detail page utilities */
+.btn-icon-back {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #213448;
+    color: #000;
+    border: none;
+}
+.offer-carousel-image {
+    object-fit: cover;
+    min-height: 250px;
+    height: 100%;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.no-image-placeholder {
+    height: 100%;
+    min-height: 250px;
+    border-radius: 8px;
+}
+.offer-card-body {
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+.no-image-placeholder-200 {
+    height: 200px;
+}
+
+/* App root wrapper utility */
+.svelte-root {
+    display: contents;
+}
