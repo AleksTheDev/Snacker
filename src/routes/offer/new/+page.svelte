@@ -1,13 +1,12 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { supabase } from "$lib/supabaseClient";
     import { session } from "$lib/session";
     import { goto } from "$app/navigation";
 
     let title = "";
     let description = "";
-    let phone = "";
-    const PHONE_LENGTH = 10; // change this value if you need a different exact length
-    let location = "";
+    let profile: any = null;
     let selectedFiles: File[] = [];
     let isLoading = false;
     let fileInputElement: HTMLInputElement;
@@ -53,7 +52,7 @@
                 } catch (e) {}
             }
             if (!publicUrl) throw new Error("Could not obtain URL for uploaded image");
-            const { error: insertError } = await supabase.from("image").insert({ offer_id: offerId, index, url: publicUrl, user_id: userId });
+            const { error: insertError } = await supabase.from("image").insert({ offer_id: offerId, index, url: publicUrl });
             if (insertError) throw insertError;
         }
     }
@@ -63,13 +62,6 @@
             alert("Моля попълнете всички полета");
             return;
         }
-        const phoneTrim = phone.trim();
-        if (phoneTrim) {
-            if (!/^\d+$/.test(phoneTrim) || phoneTrim.length !== PHONE_LENGTH) {
-                alert(`Моля въведете телефонен номер, съдържащ точно ${PHONE_LENGTH} цифри`);
-                return;
-            }
-        }
         const user = $session?.user;
         if (!user) {
             alert("Трябва да сте логнати");
@@ -77,9 +69,20 @@
         }
         isLoading = true;
         try {
-            const insertPayload: any = { title: title.trim(), description: description.trim(), user_id: user.id };
-            if (phoneTrim) insertPayload.phone = phoneTrim;
-            if (location && location.trim()) insertPayload.location = location.trim();
+            // Ensure we have the user's profile (fetched on mount or fetch now)
+            let prof = profile;
+            if (!prof) {
+                const { data: p, error: profileError } = await supabase.from("profile").select("id").eq("user_id", user.id).maybeSingle();
+                if (profileError) throw profileError;
+                if (!p) {
+                    alert("Няма регистриран профил. Моля първо създайте профил.");
+                    goto("/register");
+                    return;
+                }
+                prof = p;
+            }
+
+            const insertPayload: any = { title: title.trim(), description: description.trim(), profile_id: prof.id };
 
             const { data: offerData, error: offerError } = await supabase.from("offer").insert(insertPayload).select().single();
             if (offerError) throw offerError;
@@ -93,6 +96,39 @@
             isLoading = false;
         }
     }
+
+    onMount(async () => {
+        // Ensure we have the current user; if not present, try to get session from Supabase
+        let user: any = $session?.user;
+        if (!user) {
+            try {
+                const { data } = await supabase.auth.getSession();
+                user = (data as any)?.session?.user || null;
+            } catch (e) {
+                user = null;
+            }
+        }
+
+        if (!user) {
+            goto("/register");
+            return;
+        }
+
+        // Load profile row connected to this user for display
+        try {
+            const { data: prof, error } = await supabase.from("profile").select("id,name,location,phone_number").eq("user_id", user.id).maybeSingle();
+            if (error) {
+                console.error("Error checking profile:", error);
+            }
+            if (!prof) {
+                goto("/register");
+                return;
+            }
+            profile = prof;
+        } catch (e) {
+            console.error("Unexpected error checking profile:", e);
+        }
+    });
 </script>
 
 <main class="container py-4">
@@ -107,21 +143,12 @@
             <textarea class="form-control" rows={4} bind:value={description} disabled={isLoading}></textarea>
         </div>
         <div class="mb-3">
-            <label class="form-label">Телефон (само цифри, не е задължителен)</label>
-            <input
-                class="form-control"
-                bind:value={phone}
-                placeholder="0881234567"
-                maxlength={PHONE_LENGTH}
-                inputmode="numeric"
-                pattern="[0-9]*"
-                on:input={(e) => (phone = (e.target as HTMLInputElement).value.replace(/\D/g, "").slice(0, PHONE_LENGTH))}
-                disabled={isLoading}
-            />
+            <label class="form-label">Телефон (от профил)</label>
+            <input class="form-control" value={profile?.phone_number ?? ""} disabled />
         </div>
         <div class="mb-3">
-            <label class="form-label">Локация (напр. град или квартал)</label>
-            <input class="form-control" bind:value={location} placeholder="София, Център" maxlength={100} disabled={isLoading} />
+            <label class="form-label">Локация (от профил)</label>
+            <input class="form-control" value={profile?.location ?? ""} disabled />
         </div>
         <div class="mb-3">
             <label class="form-label">Изображения</label>
@@ -145,6 +172,7 @@
         {/if}
 
         <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-light" on:click={() => goto('/profile/edit')} disabled={isLoading}>Редактирай профил</button>
             <button class="btn btn-secondary" on:click={() => goto("/")} disabled={isLoading}>Отказ</button>
             <button class="btn btn-primary" on:click={handleSubmit} disabled={isLoading}>
                 {#if isLoading}<span class="spinner-border spinner-border-sm me-2" role="status"></span>Създавам...{:else}Създай оферта{/if}

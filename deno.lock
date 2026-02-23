@@ -5,8 +5,9 @@
     "npm:@sveltejs/adapter-static@^3.0.6": "3.0.10_@sveltejs+kit@2.50.0__@sveltejs+vite-plugin-svelte@5.1.1___svelte@5.47.1____acorn@8.15.0___vite@6.4.1____picomatch@4.0.3__svelte@5.47.1___acorn@8.15.0__typescript@5.6.3__vite@6.4.1___picomatch@4.0.3__acorn@8.15.0_@sveltejs+vite-plugin-svelte@5.1.1__svelte@5.47.1___acorn@8.15.0__vite@6.4.1___picomatch@4.0.3_svelte@5.47.1__acorn@8.15.0_typescript@5.6.3_vite@6.4.1__picomatch@4.0.3",
     "npm:@sveltejs/kit@^2.9.0": "2.50.0_@sveltejs+vite-plugin-svelte@5.1.1__svelte@5.47.1___acorn@8.15.0__vite@6.4.1___picomatch@4.0.3_svelte@5.47.1__acorn@8.15.0_typescript@5.6.3_vite@6.4.1__picomatch@4.0.3_acorn@8.15.0",
     "npm:@sveltejs/vite-plugin-svelte@5": "5.1.1_svelte@5.47.1__acorn@8.15.0_vite@6.4.1__picomatch@4.0.3",
-    "npm:@tauri-apps/api@2": "2.9.1",
+    "npm:@tauri-apps/api@2": "2.10.1",
     "npm:@tauri-apps/cli@2": "2.9.6",
+    "npm:@tauri-apps/plugin-deep-link@~2.4.7": "2.4.7",
     "npm:@tauri-apps/plugin-opener@2": "2.5.3",
     "npm:svelte-check@4": "4.3.5_svelte@5.47.1__acorn@8.15.0_typescript@5.6.3",
     "npm:svelte@5": "5.47.1_acorn@8.15.0",
@@ -406,8 +407,8 @@
         "vitefu"
       ]
     },
-    "@tauri-apps/api@2.9.1": {
-      "integrity": "sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw=="
+    "@tauri-apps/api@2.10.1": {
+      "integrity": "sha512-hKL/jWf293UDSUN09rR69hrToyIXBb8CjGaWC7gfinvnQrBVvnLr08FeFi38gxtugAVyVcTa5/FD/Xnkb1siBw=="
     },
     "@tauri-apps/cli-darwin-arm64@2.9.6": {
       "integrity": "sha512-gf5no6N9FCk1qMrti4lfwP77JHP5haASZgVbBgpZG7BUepB3fhiLCXGUK8LvuOjP36HivXewjg72LTnPDScnQQ==",
@@ -480,6 +481,12 @@
         "@tauri-apps/cli-win32-x64-msvc"
       ],
       "bin": true
+    },
+    "@tauri-apps/plugin-deep-link@2.4.7": {
+      "integrity": "sha512-K0FQlLM6BoV7Ws2xfkh+Tnwi5VZVdkI4Vw/3AGLSf0Xvu2y86AMBzd9w/SpzKhw9ai2B6ES8di/OoGDCExkOzg==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
     },
     "@tauri-apps/plugin-opener@2.5.3": {
       "integrity": "sha512-CCcUltXMOfUEArbf3db3kCE7Ggy1ExBEBl51Ko2ODJ6GDYHRp1nSNlQm5uNCFY5k7/ufaK5Ib3Du/Zir19IYQQ==",
@@ -797,6 +804,7 @@
         "npm:@sveltejs/vite-plugin-svelte@5",
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
+        "npm:@tauri-apps/plugin-deep-link@~2.4.7",
         "npm:@tauri-apps/plugin-opener@2",
         "npm:svelte-check@4",
         "npm:svelte@5",

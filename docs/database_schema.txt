@@ -1,0 +1,31 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.image (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  offer_id bigint NOT NULL,
+  index integer NOT NULL,
+  url text NOT NULL,
+  CONSTRAINT image_pkey PRIMARY KEY (id),
+  CONSTRAINT image_offer_id_fkey FOREIGN KEY (offer_id) REFERENCES public.offer(id)
+);
+CREATE TABLE public.offer (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  profile_id bigint NOT NULL,
+  title text NOT NULL,
+  description text NOT NULL,
+  CONSTRAINT offer_pkey PRIMARY KEY (id),
+  CONSTRAINT offer_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profile(id)
+);
+CREATE TABLE public.profile (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  user_id uuid NOT NULL DEFAULT auth.uid() UNIQUE,
+  name text NOT NULL,
+  location text NOT NULL,
+  phone_number text NOT NULL,
+  CONSTRAINT profile_pkey PRIMARY KEY (id),
+  CONSTRAINT profile_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);

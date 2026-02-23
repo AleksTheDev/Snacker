@@ -11,14 +11,24 @@
 
     async function fetchOffer() {
         loading = true;
-        const { data, error } = await supabase.from("offer").select("*, image(*)").eq("id", id).single();
+        const { data, error } = await supabase
+            .from("offer")
+            .select("*, image(*), profile(name,location,phone_number)")
+            .eq("id", id)
+            .single();
 
         if (error) {
             console.error("Error loading offer:", error);
             offer = null;
         } else {
             const imgs = data.image ?? data.images ?? [];
-            offer = { ...data, images: (imgs || []).sort((a: any, b: any) => (a.index ?? 0) - (b.index ?? 0)) };
+            const normalized = { ...data, images: (imgs || []).sort((a: any, b: any) => (a.index ?? 0) - (b.index ?? 0)) };
+            if (data.profile) {
+                normalized.location = data.profile.location ?? normalized.location;
+                normalized.phone = data.profile.phone_number ?? normalized.phone;
+                normalized.profile_name = data.profile.name ?? null;
+            }
+            offer = normalized;
         }
 
         loading = false;

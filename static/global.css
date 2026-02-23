@@ -228,3 +228,34 @@ a:hover {
 .svelte-root {
     display: contents;
 }
+
+/* Register page specific styles */
+.register-container {
+    max-width: 640px;
+    margin: 2.5rem auto;
+    padding: 1rem;
+}
+.register-card {
+    background-color: rgba(34, 34, 34, 0.85) !important;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.register-header {
+    margin-bottom: 0.75rem;
+    color: #ffffff !important;
+}
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+.input-required::after {
+    content: " *";
+    color: #ffcccb;
+}
+.error-text {
+    color: #ffb3b3 !important;
+    font-size: 0.9rem;
+}
