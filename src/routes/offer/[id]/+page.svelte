@@ -2,10 +2,14 @@
     import { onMount } from "svelte";
     import { page } from "$app/stores";
     import { supabase } from "$lib/supabaseClient";
+    import { session } from "$lib/session";
     import { goto } from "$app/navigation";
 
     let offer: any = null;
     let loading = true;
+    let showDeleteModal = false;
+    let isDeleting = false;
+    let isOwner = false;
 
     $: id = $page.params.id;
 
@@ -13,7 +17,7 @@
         loading = true;
         const { data, error } = await supabase
             .from("offer")
-            .select("*, image(*), profile(name,location,phone_number)")
+            .select("*, image(*), profile(id,user_id,name,location,phone_number)")
             .eq("id", id)
             .single();
 
@@ -29,6 +33,9 @@
                 normalized.profile_name = data.profile.name ?? null;
             }
             offer = normalized;
+            // determine ownership if session present
+            const s = $session;
+            isOwner = !!(s?.user && offer?.profile && offer.profile.user_id === s.user.id);
         }
 
         loading = false;
@@ -38,8 +45,74 @@
         fetchOffer();
     });
 
+    $: if ($session && offer) {
+        isOwner = !!($session.user && offer?.profile && offer.profile.user_id === $session.user.id);
+    }
+
     function goBack() {
-        history.length > 1 ? history.back() : goto("/");
+        goto("/");
+    }
+
+    async function deleteOffer() {
+        if (!offer) return;
+        const user = $session?.user;
+        if (!user) {
+            alert("Трябва да сте логнати за да изтриете обявата.");
+            return;
+        }
+        if (!offer.profile || offer.profile.user_id !== user.id) {
+            alert("Нямате права да изтриете тази обява.");
+            return;
+        }
+
+        isDeleting = true;
+        try {
+            // Fetch image records
+            const { data: images, error: imagesError } = await supabase.from("image").select("*").eq("offer_id", offer.id);
+            if (imagesError) throw imagesError;
+
+            const pathsToRemove: string[] = [];
+            for (const img of images || []) {
+                const url: string = img.url || "";
+                // Try to extract the storage path from common Supabase public URL patterns
+                // e.g. https://<project>.supabase.co/storage/v1/object/public/images/<path>
+                const m = url.match(/\/storage\/v1\/object\/(?:public|sign)\/images\/(.+)$/);
+                if (m && m[1]) {
+                    // decode in case of encoded components
+                    try {
+                        pathsToRemove.push(decodeURIComponent(m[1]));
+                    } catch (e) {
+                        pathsToRemove.push(m[1]);
+                    }
+                }
+            }
+
+            if (pathsToRemove.length > 0) {
+                try {
+                    const { error: removeError } = await supabase.storage.from("images").remove(pathsToRemove);
+                    if (removeError) console.warn("Error removing storage files:", removeError);
+                } catch (e) {
+                    console.warn("Storage removal failed:", e);
+                }
+            }
+
+            // Delete image rows
+            const { error: delImgErr } = await supabase.from("image").delete().eq("offer_id", offer.id);
+            if (delImgErr) console.warn("Error deleting image rows:", delImgErr);
+
+            // Delete offer
+            const { error: delOfferErr } = await supabase.from("offer").delete().eq("id", offer.id);
+            if (delOfferErr) throw delOfferErr;
+
+            // Success
+            goto("/");
+        } catch (e) {
+            console.error("Error deleting offer:", e);
+            alert("Грешка при изтриване. Моля опитайте отново.");
+        } finally {
+            isDeleting = false;
+            showDeleteModal = false;
+        }
     }
 </script>
 
@@ -100,10 +173,30 @@
                             {#if offer.location}
                                 <p><strong>Местоположение:</strong> {offer.location}</p>
                             {/if}
+                            {#if isOwner}
+                                <div class="d-flex gap-2 mb-3">
+                                    <button class="btn btn-outline-light" on:click={() => goto(`/offer/edit?id=${offer.id}`)}>Редактирай</button>
+                                    <button class="btn btn-danger" on:click={() => (showDeleteModal = true)}>Изтрий</button>
+                                </div>
+                            {/if}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        {#if showDeleteModal}
+            <div class="modal-backdrop" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;">
+                <div class="card p-3" style="max-width:420px;width:100%;">
+                    <h3>Потвърдете изтриване</h3>
+                    <p class="text-muted">Сигурни ли сте, че искате да изтриете тази обява? Това действие не може да бъде върнато.</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger" on:click={deleteOffer} disabled={isDeleting}>
+                            {#if isDeleting}<span class="spinner-border spinner-border-sm me-2"></span>Изтривам...{:else}Изтрий{/if}
+                        </button>
+                        <button class="btn btn-secondary" on:click={() => (showDeleteModal = false)} disabled={isDeleting}>Отказ</button>
+                    </div>
+                </div>
+            </div>
+        {/if}
     {/if}
 </main>
