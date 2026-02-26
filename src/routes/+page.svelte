@@ -78,6 +78,7 @@
         }
     }
 </script>
+
 <main class="d-flex flex-column min-vh-100">
     <div class="container py-4">
         <div class="d-flex align-items-center justify-content-between mb-3">

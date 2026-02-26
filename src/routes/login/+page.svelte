@@ -1,6 +1,9 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import { onMount } from "svelte";
     import { supabase } from "$lib/supabaseClient";
+    import { openUrl } from "@tauri-apps/plugin-opener";
+    import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 
     let email = "";
     let isSending = false;
@@ -9,21 +12,29 @@
     let otpCode = "";
     let isVerifying = false;
 
+    // Prevent double OAuth handling
+    let oauthHandled = false;
+
     function goBack() {
         goto("/");
     }
 
+    /* ---------------- EMAIL OTP ---------------- */
+
     async function openOtpModal() {
         message = null;
+
         if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
             message = "Моля въведете валиден имейл.";
             return;
         }
+
         isSending = true;
+
         try {
-            // Request an OTP to be sent to the user's email
             const { error } = await supabase.auth.signInWithOtp({ email });
             if (error) throw error;
+
             showOtpModal = true;
             message = "Провете имейла си за кода и го въведете в полето.";
         } catch (e) {
@@ -41,17 +52,23 @@
 
     async function verifyOtp() {
         message = null;
+
         if (!otpCode) {
             message = "Моля въведете OTP кода.";
             return;
         }
+
         isVerifying = true;
+
         try {
-            // Supabase client verify API can vary by version; cast to any to call verifyOtp
-            const result = await (supabase.auth as any).verifyOtp({ email, token: otpCode, type: "email" });
-            const error = result?.error;
+            const { error } = await supabase.auth.verifyOtp({
+                email,
+                token: otpCode,
+                type: "email",
+            });
+
             if (error) throw error;
-            // Successful sign in -> navigate to home
+
             closeOtpModal();
             goto("/");
         } catch (e) {
@@ -62,16 +79,82 @@
         }
     }
 
+    /* ---------------- GOOGLE OAUTH ---------------- */
+
     async function signInWithGoogle() {
-        const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}` } });
-        if (error) console.error("Error signing in:", error);
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: "snacker://auth",
+                skipBrowserRedirect: true,
+            },
+        });
+
+        if (error) {
+            console.error("Google sign in error:", error);
+            return;
+        }
+
+        // Open system browser (required for Google)
+        await openUrl(data.url);
     }
+
+    /* ---------------- DEEP LINK HANDLER ---------------- */
+
+    onMount(() => {
+        const setup = async () => {
+            const unlisten = await onOpenUrl(async (urls) => {
+                if (oauthHandled) return;
+
+                const url = urls[0];
+                if (!url) return;
+
+                try {
+                    const parsed = new URL(url);
+                    const code = parsed.searchParams.get("code");
+
+                    if (!code) return;
+
+                    oauthHandled = true;
+
+                    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+                    if (error) {
+                        console.error("Session exchange failed:", error);
+                        oauthHandled = false;
+                        return;
+                    }
+
+                    // IMPORTANT: Navigate immediately
+                    goto("/");
+                } catch (err) {
+                    console.error("Deep link handling error:", err);
+                    oauthHandled = false;
+                }
+            });
+
+            return unlisten;
+        };
+
+        let cleanup: any;
+
+        setup().then((unlisten) => {
+            cleanup = unlisten;
+        });
+
+        return () => {
+            if (cleanup) cleanup();
+        };
+    });
 </script>
 
 <main class="container py-4">
     <button class="btn btn-sm btn-link mb-3" on:click={goBack} aria-label="Назад">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden>
-            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+            <path
+                fill-rule="evenodd"
+                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
+            />
         </svg>
     </button>
 
@@ -93,7 +176,11 @@
             </button>
         </div>
 
-        <div class="d-flex align-items-center mb-3"><hr class="flex-grow-1" /><small class="mx-2 text-muted">или</small><hr class="flex-grow-1" /></div>
+        <div class="d-flex align-items-center mb-3">
+            <hr class="flex-grow-1" />
+            <small class="mx-2 text-muted">или</small>
+            <hr class="flex-grow-1" />
+        </div>
 
         <div>
             <button class="btn btn-outline-light" on:click={signInWithGoogle}>Вход с Google</button>
