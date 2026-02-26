@@ -16,6 +16,7 @@ CREATE TABLE public.offer (
   profile_id bigint NOT NULL,
   title text NOT NULL,
   description text NOT NULL,
+  price real NOT NULL,
   CONSTRAINT offer_pkey PRIMARY KEY (id),
   CONSTRAINT offer_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES public.profile(id)
 );

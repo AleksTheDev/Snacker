@@ -7,7 +7,8 @@
 
     let title = "";
     let description = "";
-    let price: any = null;
+    let price: string = "";
+    let isFree: boolean = false;
     let profile: any = null;
     let selectedFiles: File[] = [];
     let isLoading = false;
@@ -127,7 +128,17 @@
 
             // Update offer
             const updatePayload: any = { title: title.trim(), description: description.trim() };
-            if (price) updatePayload.price = price;
+            // compute price value
+            let priceValue = 0;
+            if (!isFree) {
+                if (!price || isNaN(Number(price)) || Number(price) < 0) {
+                    alert("Моля въведете валидна цена (неотрицателно число, две десетични)");
+                    isLoading = false;
+                    return;
+                }
+                priceValue = Math.round(Number(price) * 100) / 100;
+            }
+            updatePayload.price = priceValue;
 
             const { data: updated, error: updateError } = await supabase.from("offer").update(updatePayload).eq("id", offerId).select().single();
             if (updateError) throw updateError;
@@ -173,7 +184,11 @@
 
         // Fetch offer and ensure ownership
         try {
-            const { data, error } = await supabase.from("offer").select("*, image(*), profile(id,user_id,name,location,phone_number)").eq("id", offerId).maybeSingle();
+            const { data, error } = await supabase
+                .from("offer")
+                .select("*, image(*), profile(id,user_id,name,location,phone_number)")
+                .eq("id", offerId)
+                .maybeSingle();
             if (error) throw error;
             if (!data) {
                 alert("Оферта не е намерена.");
@@ -190,11 +205,16 @@
             // Prefill fields
             title = offer.title || "";
             description = offer.description || "";
-            price = offer.price || null;
+            price = offer.price != null ? Number(offer.price).toFixed(2) : "";
+            isFree = Number(offer.price) === 0;
 
             // Load profile row for this user
             try {
-                const { data: prof, error: profErr } = await supabase.from("profile").select("id,name,location,phone_number").eq("user_id", user.id).maybeSingle();
+                const { data: prof, error: profErr } = await supabase
+                    .from("profile")
+                    .select("id,name,location,phone_number")
+                    .eq("user_id", user.id)
+                    .maybeSingle();
                 if (profErr) console.error("Profile lookup error:", profErr);
                 if (!prof) {
                     goto("/register");
@@ -224,13 +244,29 @@
             <textarea class="form-control" rows={4} bind:value={description} disabled={isLoading}></textarea>
         </div>
         <div class="mb-3">
-            <label class="form-label">Телефон (от профил)</label>
-            <input class="form-control" value={profile?.phone_number ?? ""} disabled />
+            <label class="form-label">Профил</label>
+            <input class="form-control" value={profile?.name ?? ""} disabled />
         </div>
-        <div class="mb-3">
-            <label class="form-label">Локация (от профил)</label>
-            <input class="form-control" value={profile?.location ?? ""} disabled />
+        <div class="mb-3 form-check">
+            <input
+                class="form-check-input"
+                type="checkbox"
+                id="isFreeEdit"
+                bind:checked={isFree}
+                on:change={() => {
+                    if (isFree) price = "";
+                }}
+                disabled={isLoading}
+            />
+            <label class="form-check-label" for="isFreeEdit">Безплатно</label>
         </div>
+        {#if !isFree}
+            <div class="mb-3">
+                <label class="form-label">Цена (€)</label>
+                <input class="form-control" type="number" min="0" step="0.01" bind:value={price} placeholder="0.00" disabled={isLoading} />
+                <small class="text-muted">Въведете цена в евро (напр. 3.50)</small>
+            </div>
+        {/if}
 
         <!-- <div class="mb-3">
             <label class="form-label">Текущи изображения</label>

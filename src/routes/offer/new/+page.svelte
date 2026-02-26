@@ -6,6 +6,8 @@
 
     let title = "";
     let description = "";
+    let price: string = "";
+    let isFree: boolean = false;
     let profile: any = null;
     let selectedFiles: File[] = [];
     let isLoading = false;
@@ -82,7 +84,18 @@
                 prof = p;
             }
 
-            const insertPayload: any = { title: title.trim(), description: description.trim(), profile_id: prof.id };
+            // validate price
+            let priceValue = 0;
+            if (!isFree) {
+                if (!price || isNaN(Number(price)) || Number(price) < 0) {
+                    alert("Моля въведете валидна цена (неотрицателно число, две десетични)");
+                    isLoading = false;
+                    return;
+                }
+                priceValue = Math.round(Number(price) * 100) / 100;
+            }
+
+            const insertPayload: any = { title: title.trim(), description: description.trim(), profile_id: prof.id, price: priceValue };
 
             const { data: offerData, error: offerError } = await supabase.from("offer").insert(insertPayload).select().single();
             if (offerError) throw offerError;
@@ -143,18 +156,34 @@
             <textarea class="form-control" rows={4} bind:value={description} disabled={isLoading}></textarea>
         </div>
         <div class="mb-3">
-            <label class="form-label">Телефон (от профил)</label>
-            <input class="form-control" value={profile?.phone_number ?? ""} disabled />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Локация (от профил)</label>
-            <input class="form-control" value={profile?.location ?? ""} disabled />
+            <label class="form-label">Профил</label>
+            <input class="form-control" value={profile?.name ?? ""} disabled />
         </div>
         <div class="mb-3">
             <label class="form-label">Изображения</label>
             <input type="file" class="form-control" multiple accept="image/*" bind:this={fileInputElement} on:change={handleFileSelect} disabled={isLoading} />
             <small class="text-muted">Изберете няколко изображения (не e задължително)</small>
         </div>
+        <div class="mb-3 form-check">
+            <input
+                class="form-check-input"
+                type="checkbox"
+                id="isFree"
+                bind:checked={isFree}
+                on:change={() => {
+                    if (isFree) price = "";
+                }}
+                disabled={isLoading}
+            />
+            <label class="form-check-label" for="isFree">Безплатно</label>
+        </div>
+        {#if !isFree}
+            <div class="mb-3">
+                <label class="form-label">Цена (€)</label>
+                <input class="form-control" type="number" min="0" step="0.01" bind:value={price} placeholder="0.00" disabled={isLoading} />
+                <small class="text-muted">Въведете цена в евро (напр. 3.50)</small>
+            </div>
+        {/if}
 
         {#if selectedFiles.length > 0}
             <div class="mb-3">
@@ -172,7 +201,7 @@
         {/if}
 
         <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-outline-light" on:click={() => goto('/profile/edit')} disabled={isLoading}>Редактирай профил</button>
+            <button class="btn btn-outline-light" on:click={() => goto("/profile/edit")} disabled={isLoading}>Редактирай профил</button>
             <button class="btn btn-secondary" on:click={() => goto("/")} disabled={isLoading}>Отказ</button>
             <button class="btn btn-primary" on:click={handleSubmit} disabled={isLoading}>
                 {#if isLoading}<span class="spinner-border spinner-border-sm me-2" role="status"></span>Създавам...{:else}Създай оферта{/if}
