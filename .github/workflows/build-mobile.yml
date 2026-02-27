@@ -61,7 +61,7 @@ jobs:
                   -project "$PROJECT" \
                   -scheme "$SCHEME" \
                   -archivePath "$ARCHIVE_PATH" \
-                  -configuration Release \
+                  -configuration release \
                   -destination "generic/platform=iOS" \
                   CODE_SIGNING_REQUIRED=NO \
                   CODE_SIGNING_ALLOWED=NO
