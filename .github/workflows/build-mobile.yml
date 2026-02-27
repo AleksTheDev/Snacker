@@ -53,7 +53,7 @@ jobs:
 
             - name: Build unsigned iOS .xcarchive
               run: |
-                  APP_NAME="Snacker"
+                  APP_NAME="snacker"
                   SCHEME="${APP_NAME}_iOS"
                   PROJECT="src-tauri/gen/apple/${APP_NAME}.xcodeproj"
                   ARCHIVE_PATH="src-tauri/gen/apple/build/App.xcarchive"
