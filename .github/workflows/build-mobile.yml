@@ -50,6 +50,7 @@ jobs:
               run: |
                   rm -rf src-tauri/gen/apple
                   deno task tauri ios init
+                  ls -al src-tauri/gen/apple
 
             - name: Build unsigned iOS .xcarchive
               run: |
@@ -64,8 +65,7 @@ jobs:
                   -configuration Release \
                   -destination "generic/platform=iOS" \
                   CODE_SIGNING_REQUIRED=NO \
-                  CODE_SIGNING_ALLOWED=NO \
-                  | xcpretty || true
+                  CODE_SIGNING_ALLOWED=NO
                   ls -la "src-tauri/gen/apple/build/" || true
 
             - name: Convert .xcarchive to .ipa
