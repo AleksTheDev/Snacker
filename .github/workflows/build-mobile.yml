@@ -54,17 +54,18 @@ jobs:
                   deno task tauri ios init
                   ls -al src-tauri/gen/apple
 
-            - name: Create Tauri dev server addr stub
-              run: |
-                  BUNDLE_ID="com.pmgbs.snacker"
-                  echo "http://localhost:1420" > "${TMPDIR}${BUNDLE_ID}-server-addr"
-                  echo "Created stub at: ${TMPDIR}${BUNDLE_ID}-server-addr"
-
             - name: Build unsigned iOS .xcarchive
               env:
                   CI: "true"
               run: |
                   mkdir -p src-tauri/gen/apple/build
+                  echo "Starting Tauri dev server..."
+                  deno task tauri ios dev --release --open &
+                  TAURI_PID=$!
+                  # Ensure cleanup even if build fails
+                  trap "kill $TAURI_PID" EXIT
+                  echo "Waiting for dev server..."
+                  sleep 30
                   APP_NAME="snacker"
                   SCHEME="${APP_NAME}_iOS"
                   PROJECT="src-tauri/gen/apple/${APP_NAME}.xcodeproj"
@@ -78,6 +79,7 @@ jobs:
                   CODE_SIGNING_REQUIRED=NO \
                   CODE_SIGNING_ALLOWED=NO
                   ls -la "src-tauri/gen/apple/build/" || true
+                  kill $TAURI_PID || true
 
             - name: Convert .xcarchive to .ipa
               run: |
