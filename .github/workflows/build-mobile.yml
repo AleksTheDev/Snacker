@@ -3,6 +3,7 @@ on: workflow_dispatch
 jobs:
     build-mobile:
         runs-on: macos-latest
+        environment: Mobile Build
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         steps:
