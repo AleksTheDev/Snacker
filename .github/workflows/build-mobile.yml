@@ -47,12 +47,18 @@ jobs:
                   EOF
 
             - name: Regenerate iOS project
+              env:
+                  CI: "true"
               run: |
+                  rm -rf src-tauri/gen/apple
                   deno task tauri ios init
                   ls -al src-tauri/gen/apple
 
             - name: Build unsigned iOS .xcarchive
+              env:
+                  CI: "true"
               run: |
+                  mkdir -p src-tauri/gen/apple/build
                   APP_NAME="snacker"
                   SCHEME="${APP_NAME}_iOS"
                   PROJECT="src-tauri/gen/apple/${APP_NAME}.xcodeproj"
