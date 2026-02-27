@@ -72,14 +72,14 @@ jobs:
                   EOF
 
             - name: Build Android
-              uses: tauri-apps/tauri-action@main
+              uses: tauri-apps/tauri-action@dev
               with:
                   mobile: android
                   uploadWorkflowArtifacts: true
                   workflowArtifactNamePattern: "[name]-android-[arch]-[bundle]"
 
             - name: Build iOS
-              uses: tauri-apps/tauri-action@main
+              uses: tauri-apps/tauri-action@dev
               with:
                   mobile: ios
                   uploadWorkflowArtifacts: true
