@@ -1,0 +1,79 @@
+name: "build-mobile"
+on: workflow_dispatch
+jobs:
+    build-mobile:
+        runs-on: macos-latest
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Deno
+              uses: denoland/setup-deno@v2
+              with:
+                  deno-version: v2
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Setup Homebrew
+              uses: Homebrew/actions/setup-homebrew@main
+
+            - name: Install Homebrew dependencies
+              run: brew install cocoapods openjdk@17
+
+            - name: Install Android CMD tools
+              run: brew install --cask android-commandlinetools
+
+            - name: Install Android SDK + NDK
+              run: |
+                  yes | sdkmanager --licenses
+                  sdkmanager \
+                  "platform-tools" \
+                  "platforms;android-36" \
+                  "build-tools;36.1.0" \
+                  "ndk;29.0.14206865"
+
+            - name: Install Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: >
+                      aarch64-apple-ios
+                      aarch64-linux-android
+                      armv7-linux-androideabi
+                      i686-linux-android
+                      x86_64-linux-android
+
+            - name: Install dependencies
+              run: deno install
+
+            - name: Decode Android Keystore
+              run: |
+                  echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > src-tauri/gen/android/release-keystore.jks
+              env:
+                  ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+            - name: Create keystore.properties
+              run: |
+                  cat <<EOF > src-tauri/gen/android/keystore.properties
+                  password=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+                  keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+                  storeFile=release-keystore.jks
+                  EOF
+
+            - name: Build Android
+              uses: tauri-apps/tauri-action@v0
+              with:
+                  mobile: android
+                  uploadWorkflowArtifacts: true
+                  workflowArtifactNamePattern: "[name]-android-[arch]-[bundle]"
+
+            - name: Build iOS
+              uses: tauri-apps/tauri-action@v0
+              with:
+                  mobile: ios
+                  uploadWorkflowArtifacts: true
+                  workflowArtifactNamePattern: "[name]-ios-[arch]-[bundle]"
