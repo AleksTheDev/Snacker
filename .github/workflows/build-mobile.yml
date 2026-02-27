@@ -20,28 +20,11 @@ jobs:
               with:
                   node-version: 24
 
-            - name: Decode Android Keystore
-              run: |
-                  base64 -d <<< "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" > src-tauri/gen/android/app/release-keystore.jks
-                  cksum src-tauri/gen/android/app/release-keystore.jks
-
             - name: Setup Homebrew
               uses: Homebrew/actions/setup-homebrew@main
 
             - name: Install Homebrew dependencies
               run: brew install cocoapods openjdk@17
-
-            - name: Install Android CMD tools
-              run: brew install --cask android-commandlinetools
-
-            - name: Install Android SDK + NDK
-              run: |
-                  yes | sdkmanager --licenses
-                  sdkmanager \
-                  "platform-tools" \
-                  "platforms;android-36" \
-                  "build-tools;36.1.0" \
-                  "ndk;29.0.14206865"
 
             - name: Install Rust
               uses: dtolnay/rust-toolchain@stable
@@ -53,7 +36,7 @@ jobs:
                       i686-linux-android
                       x86_64-linux-android
 
-            - name: Install dependencies
+            - name: Install Snacker dependencies
               run: deno install
 
             - name: Create .env
@@ -63,17 +46,14 @@ jobs:
                   PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
                   EOF
 
-            - name: Create keystore.properties
+            - name: Regenerate iOS project
               run: |
-                  cat <<EOF > src-tauri/gen/android/keystore.properties
-                  password=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-                  keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-                  storeFile=release-keystore.jks
-                  EOF
+                  rm -rf src-tauri/gen/apple
+                  deno task tauri ios init
 
             - name: Build unsigned iOS .xcarchive
               run: |
-                  APP_NAME="snacker"
+                  APP_NAME="Snacker"
                   SCHEME="${APP_NAME}_iOS"
                   PROJECT="src-tauri/gen/apple/${APP_NAME}.xcodeproj"
                   ARCHIVE_PATH="src-tauri/gen/apple/build/App.xcarchive"
@@ -107,6 +87,31 @@ jobs:
                   name: Snacker-ios-aarch64-ipa
                   path: src-tauri/gen/apple/build/App.ipa
                   if-no-files-found: ignore
+
+            - name: Install Android CMD tools
+              run: brew install --cask android-commandlinetools
+
+            - name: Install Android SDK + NDK
+              run: |
+                  yes | sdkmanager --licenses
+                  sdkmanager \
+                  "platform-tools" \
+                  "platforms;android-36" \
+                  "build-tools;36.1.0" \
+                  "ndk;29.0.14206865"
+
+            - name: Decode Android Keystore
+              run: |
+                  base64 -d <<< "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" > src-tauri/gen/android/app/release-keystore.jks
+                  cksum src-tauri/gen/android/app/release-keystore.jks
+
+            - name: Create keystore.properties
+              run: |
+                  cat <<EOF > src-tauri/gen/android/keystore.properties
+                  password=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+                  keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+                  storeFile=release-keystore.jks
+                  EOF
 
             - name: Build Android
               uses: tauri-apps/tauri-action@dev
