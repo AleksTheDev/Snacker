@@ -22,7 +22,7 @@ jobs:
             - name: Decode Android Keystore
               run: |
                   base64 -d <<< "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" > src-tauri/gen/android/app/release-keystore.jks
-                  cksum -a sha256 src-tauri/gen/android/app/release-keystore.jks
+                  cksum src-tauri/gen/android/app/release-keystore.jks
 
             - name: Setup Homebrew
               uses: Homebrew/actions/setup-homebrew@main
