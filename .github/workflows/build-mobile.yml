@@ -19,6 +19,9 @@ jobs:
               with:
                   node-version: 24
 
+            - name: Decode Android Keystore
+              run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | gpg --dearmor -o src-tauri/gen/android/app/release-keystore.jks -
+
             - name: Setup Homebrew
               uses: Homebrew/actions/setup-homebrew@main
 
@@ -56,12 +59,6 @@ jobs:
                   PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}
                   PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
                   EOF
-
-            - name: Decode Android Keystore
-              run: |
-                  echo "$ANDROID_KEYSTORE_BASE64" | gpg --dearmor -o src-tauri/gen/android/app/release-keystore.jks -
-              env:
-                  ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
             - name: Create keystore.properties
               run: |
