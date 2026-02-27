@@ -85,7 +85,9 @@ jobs:
               run: |
                   mkdir src-tauri/gen/apple/build/Payload
                   cp -R src-tauri/gen/apple/build/App.xcarchive/Products/Applications/*.app src-tauri/gen/apple/build/Payload/
-                  zip -r src-tauri/gen/apple/build/App.ipa src-tauri/gen/apple/build/Payload
+                  cd src-tauri/gen/apple/build
+                  zip -r App.ipa Payload
+                  cd ../../../..
 
             - name: Upload .xcarchive as workflow artifact
               uses: actions/upload-artifact@v6
