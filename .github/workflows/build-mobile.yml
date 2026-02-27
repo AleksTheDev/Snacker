@@ -17,7 +17,7 @@ jobs:
             - name: Setup Node
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 24
 
             - name: Setup Homebrew
               uses: Homebrew/actions/setup-homebrew@main
@@ -50,6 +50,13 @@ jobs:
             - name: Install dependencies
               run: deno install
 
+            - name: Create .env
+              run: |
+                  cat <<EOF > .env
+                  PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}
+                  PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+                  EOF
+
             - name: Decode Android Keystore
               run: |
                   echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > src-tauri/gen/android/release-keystore.jks
@@ -65,14 +72,14 @@ jobs:
                   EOF
 
             - name: Build Android
-              uses: tauri-apps/tauri-action@v0
+              uses: tauri-apps/tauri-action@main
               with:
                   mobile: android
                   uploadWorkflowArtifacts: true
                   workflowArtifactNamePattern: "[name]-android-[arch]-[bundle]"
 
             - name: Build iOS
-              uses: tauri-apps/tauri-action@v0
+              uses: tauri-apps/tauri-action@main
               with:
                   mobile: ios
                   uploadWorkflowArtifacts: true
