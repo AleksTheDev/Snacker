@@ -59,7 +59,7 @@ jobs:
 
             - name: Decode Android Keystore
               run: |
-                  echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > src-tauri/gen/android/release-keystore.jks
+                  echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > src-tauri/gen/android/app/release-keystore.jks
               env:
                   ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
