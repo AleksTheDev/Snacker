@@ -48,7 +48,6 @@ jobs:
 
             - name: Regenerate iOS project
               run: |
-                  rm -rf src-tauri/gen/apple
                   deno task tauri ios init
                   ls -al src-tauri/gen/apple
 
@@ -64,9 +63,6 @@ jobs:
                   -archivePath "$ARCHIVE_PATH" \
                   -configuration Release \
                   -destination "generic/platform=iOS" \
-                  -sdk iphoneos \
-                  BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-                  SKIP_INSTALL=NO \
                   CODE_SIGNING_REQUIRED=NO \
                   CODE_SIGNING_ALLOWED=NO
                   ls -la "src-tauri/gen/apple/build/" || true
