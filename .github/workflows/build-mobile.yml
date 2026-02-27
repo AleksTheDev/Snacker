@@ -20,7 +20,7 @@ jobs:
                   node-version: 24
 
             - name: Decode Android Keystore
-              run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | gpg --dearmor -o src-tauri/gen/android/app/release-keystore.jks -
+              run: gpg --dearmor -o src-tauri/gen/android/app/release-keystore.jks <<< "${{ secrets.ANDROID_KEYSTORE_BASE64 }}"
 
             - name: Setup Homebrew
               uses: Homebrew/actions/setup-homebrew@main
