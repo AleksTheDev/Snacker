@@ -23,7 +23,7 @@ jobs:
               uses: Homebrew/actions/setup-homebrew@main
 
             - name: Install Homebrew dependencies
-              run: brew install cocoapods openjdk@17
+              run: brew install cocoapods openjdk@17 gnupg
 
             - name: Install Android CMD tools
               run: brew install --cask android-commandlinetools
@@ -59,7 +59,7 @@ jobs:
 
             - name: Decode Android Keystore
               run: |
-                  echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > src-tauri/gen/android/app/release-keystore.jks
+                  echo "$ANDROID_KEYSTORE_BASE64" | gpg --dearmor -o src-tauri/gen/android/app/release-keystore.jks -
               env:
                   ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
