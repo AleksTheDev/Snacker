@@ -54,6 +54,12 @@ jobs:
                   deno task tauri ios init
                   ls -al src-tauri/gen/apple
 
+            - name: Create Tauri dev server addr stub
+              run: |
+                  BUNDLE_ID="com.pmgbs.snacker"
+                  echo "http://localhost:1420" > "${TMPDIR}${BUNDLE_ID}-server-addr"
+                  echo "Created stub at: ${TMPDIR}${BUNDLE_ID}-server-addr"
+
             - name: Build unsigned iOS .xcarchive
               env:
                   CI: "true"
