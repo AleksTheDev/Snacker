@@ -72,7 +72,7 @@
             const payload = { name: tn, phone_number: tp, location: tl };
             const { data, error } = await supabase.from("profile").update(payload).eq("id", profileId).select().single();
             if (error) throw error;
-            goto("/offer/new");
+            goto("/");
         } catch (e) {
             console.error("Error updating profile:", e);
             errorMessage = "Грешка при запис. Моля опитайте отново.";
@@ -115,7 +115,7 @@
         </div>
 
         <div class="form-actions">
-            <button class="btn btn-secondary" on:click={() => goto("/offer/new")} disabled={isSubmitting}>Отказ</button>
+            <button class="btn btn-secondary" on:click={() => goto("/")} disabled={isSubmitting}>Отказ</button>
             <button class="btn btn-primary" on:click={submitUpdate} disabled={isSubmitting}>
                 {#if isSubmitting}
                     <span class="spinner-border spinner-border-sm me-2" role="status"></span>Записвам...

@@ -201,7 +201,6 @@
         {/if}
 
         <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-outline-light" on:click={() => goto("/profile/edit")} disabled={isLoading}>Редактирай профил</button>
             <button class="btn btn-secondary" on:click={() => goto("/")} disabled={isLoading}>Отказ</button>
             <button class="btn btn-primary" on:click={handleSubmit} disabled={isLoading}>
                 {#if isLoading}<span class="spinner-border spinner-border-sm me-2" role="status"></span>Създавам...{:else}Създай оферта{/if}

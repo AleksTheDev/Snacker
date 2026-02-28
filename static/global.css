@@ -1,7 +1,7 @@
 /* Global stylesheet consolidated from per-file styles */
 /* Page background and base colors */
 body {
-    background: linear-gradient(to right, #eb4e4e, #ffed54);
+    background: linear-gradient(to right, #eb4e4e, #ddcc00);
     min-height: 100vh;
     color: #ffffff;
 }
@@ -61,9 +61,6 @@ textarea.form-control {
 
 a {
     text-decoration: none;
-}
-a:hover {
-    color: #a12d2d !important;
 }
 .text-muted {
     color: rgba(255, 255, 255, 0.7) !important;
@@ -239,7 +236,7 @@ a:hover {
     background-color: rgba(34, 34, 34, 0.85) !important;
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 .register-header {
     margin-bottom: 0.75rem;
@@ -258,4 +255,11 @@ a:hover {
 .error-text {
     color: #ffb3b3 !important;
     font-size: 0.9rem;
+}
+.dropdown-menu {
+    background-color: #a12d2d;
+}
+
+.dropdown-item:hover {
+    background-color: #6a1f1f;
 }

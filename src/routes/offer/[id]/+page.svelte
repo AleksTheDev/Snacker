@@ -159,18 +159,27 @@
                     <div class="col-md-7">
                         <div class="card-body offer-card-body">
                             <h1 class="card-title">{offer.title}</h1>
-                            <p class="text-muted">{offer.description}</p>
+                            <h5 class="text-muted">{offer.description}</h5>
+                            <hr />
                             {#if offer.price != null}
-                                <p><strong>Цена:</strong> {Number(offer.price) === 0 ? "Безплатно" : `${Number(offer.price).toFixed(2)} €`}</p>
+                                <h5 class="text-muted d-block mb-1">
+                                    Цена:
+                                    <strong>{Number(offer.price) === 0 ? "Безплатно" : `${Number(offer.price).toFixed(2)} €`}</strong>
+                                </h5>
                             {/if}
                             {#if offer.phone}
-                                <p><strong>Телефон:</strong> <a class="text-white" href="tel:{offer.phone}">{offer.phone}</a></p>
+                                <h5 class="text-muted d-block mb-1">
+                                    Телефон: <a class="text-white" href="tel:{offer.phone}">{offer.phone}</a>
+                                </h5>
                             {/if}
                             {#if offer.location}
-                                <p><strong>Местоположение:</strong> {offer.location}</p>
+                                <h5 class="text-muted d-block mb-1">Местоположение: <strong>{offer.location}</strong></h5>
                             {/if}
+                            <hr />
                             {#if offer.created_at}
-                                <p class="text-muted"><small>От: {offer.profile_name}<br />Създадена: {new Date(offer.created_at).toLocaleString()}</small></p>
+                                <p class="">
+                                    От: {offer.profile_name}<br />Създадена: {new Date(offer.created_at).toLocaleString()}
+                                </p>
                             {/if}
                             {#if isOwner}
                                 <div class="d-flex gap-2 mb-3">
