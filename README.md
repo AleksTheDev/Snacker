@@ -1,7 +1,40 @@
-# Tauri + SvelteKit + TypeScript
+## Въведение
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
+Проектът „Снакър“ представлява разработка на мобилно приложение за спасяване на храна. Основната му цел е да намали разхищението на хранителни продукти чрез създаване на дигитална платформа за публикуване и намиране на обяви за налични продукти.
 
-## Recommended IDE Setup
+В съвременната среда значителна част от хранителните продукти се изхвърля ежедневно, въпреки че са годни за консумация. Това води до икономически загуби за търговските обекти и отрицателно въздействие върху околната среда.
+Съществува реална потребност от решение, което да свързва търговците, разполагащи с излишна храна, с потребители, които търсят достъпни продукти.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+Приложението има за цел да:
+
+- Намали хранителните отпадъци;
+- Осигури удобна платформа за публикуване на обяви;
+- Позволи бързо търсене и намиране на хранителни продукти;
+- Улесни комуникацията между търговец и потребител.
+
+## Локално стартиране
+
+### 1. Клониране:
+
+`git clone https://github.com/AleksTheDev/Snacker`
+
+### 2. Създаване на .env файл:
+
+    PUBLIC_SUPABASE_URL=...
+    PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=...
+
+### 3. Инсталиране:
+
+`deno install`
+
+### 4. Development:
+
+`deno task tauri android dev`  
+или  
+`deno task tauri ios dev`
+
+### 5. Production билд
+
+`deno task tauri android build`  
+или  
+`deno task tauri ios build`
