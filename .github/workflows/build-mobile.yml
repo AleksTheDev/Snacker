@@ -48,60 +48,25 @@ jobs:
 
             - name: Regenerate iOS project
               env:
-                  CI: "true"
+                  IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
+                  IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+                  IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
               run: |
                   rm -rf src-tauri/gen/apple
                   deno task tauri ios init
+                  deno task tauri icon static/icon.png
                   ls -al src-tauri/gen/apple
 
-            - name: Build unsigned iOS .xcarchive
+            - name: Build iOS
+              uses: tauri-apps/tauri-action@dev
               env:
-                  CI: "true"
-              run: |
-                  mkdir -p src-tauri/gen/apple/build
-                  echo "Starting Tauri dev server..."
-                  deno task tauri ios dev --release --open &
-                  TAURI_PID=$!
-                  # Ensure cleanup even if build fails
-                  trap "kill $TAURI_PID" EXIT
-                  echo "Waiting for dev server..."
-                  sleep 30
-                  APP_NAME="snacker"
-                  SCHEME="${APP_NAME}_iOS"
-                  PROJECT="src-tauri/gen/apple/${APP_NAME}.xcodeproj"
-                  ARCHIVE_PATH="src-tauri/gen/apple/build/App.xcarchive"
-                  xcodebuild archive \
-                  -project "$PROJECT" \
-                  -scheme "$SCHEME" \
-                  -archivePath "$ARCHIVE_PATH" \
-                  -configuration release \
-                  -destination "generic/platform=iOS" \
-                  CODE_SIGNING_REQUIRED=NO \
-                  CODE_SIGNING_ALLOWED=NO
-                  ls -la "src-tauri/gen/apple/build/" || true
-                  kill $TAURI_PID || true
-
-            - name: Convert .xcarchive to .ipa
-              run: |
-                  mkdir src-tauri/gen/apple/build/Payload
-                  cp -R src-tauri/gen/apple/build/App.xcarchive/Products/Applications/*.app src-tauri/gen/apple/build/Payload/
-                  cd src-tauri/gen/apple/build
-                  zip -r App.ipa Payload
-                  cd ../../../..
-
-            - name: Upload .xcarchive as workflow artifact
-              uses: actions/upload-artifact@v6
+                  IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
+                  IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+                  IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
               with:
-                  name: Snacker-ios-aarch64-xcarchive
-                  path: src-tauri/gen/apple/build/App.xcarchive
-                  if-no-files-found: ignore
-
-            - name: Upload .ipa as workflow artifact
-              uses: actions/upload-artifact@v6
-              with:
-                  name: Snacker-ios-aarch64-ipa
-                  path: src-tauri/gen/apple/build/App.ipa
-                  if-no-files-found: ignore
+                  mobile: ios
+                  uploadWorkflowArtifacts: true
+                  workflowArtifactNamePattern: "[name]-ios-[arch]-[bundle]"
 
             - name: Install Android CMD tools
               run: brew install --cask android-commandlinetools
