@@ -52,6 +52,7 @@ jobs:
               run: |
                   rm -rf src-tauri/gen/apple
                   deno task tauri ios init
+                  deno task tauri icon static/icon.png
                   ls -al src-tauri/gen/apple
 
             - name: Build unsigned iOS .xcarchive
@@ -60,7 +61,7 @@ jobs:
               run: |
                   mkdir -p src-tauri/gen/apple/build
                   echo "Starting Tauri dev server..."
-                  deno task tauri ios dev --release --open &
+                  deno task tauri ios build --open &
                   TAURI_PID=$!
                   # Ensure cleanup even if build fails
                   trap "kill $TAURI_PID" EXIT
